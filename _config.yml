@@ -3,8 +3,8 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Carlog
-subtitle: I'm haishanh
+title: Carlog 
+subtitle: Where Haishan Write 
 description:
 author: haishanh
 language:
@@ -70,5 +70,5 @@ theme: start
 ## Docs: http://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:haishanh/haishanh.github.io.git 
-  branch: master
+  repo: git@github.com:haishanh/blog.git 
+  branch: gh-pages
