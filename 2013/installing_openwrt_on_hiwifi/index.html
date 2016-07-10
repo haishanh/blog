@@ -1,0 +1,104 @@
+<!DOCTYPE html><html><head><title>Installing OpenWRT on Hiwifi | Carlog</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><link rel="alternate" href="atom.xml" type="application/atom+xml"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/main.css" type="text/css"></head><body><header><div class="wrapper"><a href="/" class="site-title"><code>Carlog</code></a><div class="menu"><span class="hamburger"><span></span></span></div><nav role="navigation" class="nav"><a href="/">Home</a><a href="/archives">Archives</a><a href="/atom.xml">RSS</a></nav></div></header><section class="main post"><div class="wrapper clearfix"><div class="post-header"><h2 class="post-title"><a href="/2013/installing_openwrt_on_hiwifi/">Installing OpenWRT on Hiwifi</a></h2><time datetime="2013-12-13T10:58:46.000Z">December 13, 2013</time></div><div class="post-content"><p>买了个极路由，外观什么的确实挺酷，管理界面也比较友好，但所谓的App Store加速什么的，我真的完全没体会到，而且我的笔记本连上后，隔一段时间就会掉。所以就准备刷个OpenWRT，而且还可以用用goagent，之前尝试过一次，刷机应该是成功了，但telnet的时候一直连不上，应该是因为极路由地址是192.168.199.1的<a href="http://www.xj123.info/4251.html" target="_blank" rel="external">问题</a>，但当时不知道。前天晚上又重新搞了一下，基本是搞定了。</p>
+<p>可能你需用用到的一些工具和文件，我提供在此，每个文件后面的注释中有注明出处，感谢各位。<br>点<a href="http://pan.baidu.com/s/1w3sBD" target="_blank" rel="external">这儿</a>下载,百度网盘。<br>&gt;<br>File1: HiWiFi_OpenWrt.zip //极路由论坛上的官方人员提供的OpenWRT固件 <a href="http://bbs.hiwifi.com/thread-7710-1-1.html" target="_blank" rel="external">出处</a><br>File2: 小极修砖工具.rar //极路由论坛上的官方人员提供的修复工具 出处同上<br>File3: recovery.bin //巢鹏编译好的固件 <a href="http://chaopeng.me/blog/2013/10/28/hiwifi.html" target="_blank" rel="external">出处</a><br>File4: gevent_1.0rc2-1_ar71xx.ipk //适用于ar71xx平台已编译好的gevent <a href="http://www.right.com.cn/forum/thread-121599-1-1.html" target="_blank" rel="external">出处</a><br>File5: python-greenlet_0.4.0-1_ar71xx.ipk //处理多线程 出处同上</p>
+<a id="more"></a>
+<p>-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
+<p>[TOC]</p>
+<p>##编译Hiwifi的OpenWRT固件<br>上一次尝试刷的时候，我是自己编译的，但编译时间比较长，这次我是直接使用的是巢鹏编译好的固件，也就是<em>File3</em>: recovery.bin，如果你适用这个文件的话，可以直接跳到刷机步骤<br>以下编译方法都是从<a href="http://bbs.hiwifi.com/thread-7475-1-1.html" target="_blank" rel="external">carabob</a>，<a href="http://chaopeng.me/blog/2013/10/28/hiwifi.html" target="_blank" rel="external">巢鹏</a>，<a href="http://blog.omitol.com/openwrt-for-hiwifi/" target="_blank" rel="external">Hacker007</a>等人那抄过来的，我就是做个记录。</p>
+<p>###环境准备<br>理论上有个Linux就可以了，但推荐用Ubuntu 12.04+，再安装subversion、git和build-essential等</p>
+<pre><code>sudo apt-get install build-essential
+sudo apt-get install subversion git
+</code></pre><p>###获取源码</p>
+<pre><code>svn co https://code.hiwifi.com/svn/hiwifi
+</code></pre><p>遇到提示输入密码时，直接打回车，然后出来输入用户名的提示，输入极客社区帐号email，再输入密码。</p>
+<p>###编译<br>    cd hiwifi/trunk<br>    ./scripts/feeds update -a<br>    ./scripts/feeds install -a<br>    make package/symlinks<br>使用默认的编译选项</p>
+<pre><code>make HC6361_defconfig
+</code></pre><p>也可以自定义编译选项</p>
+<pre><code>make menuconfig
+</code></pre><p>可以把openssh、python、pythonopenssl、unbound等，都配置进去。</p>
+<p>最后：</p>
+<pre><code>make -j4
+</code></pre><p>如果出错，要查看详细的编译信息可以使用V=s参数:</p>
+<pre><code>make -j4 V=s
+</code></pre><p>开始漫长的编译。</p>
+<p>###制作成recovery.bin<br>    wget -O rom.bin <a href="http://updaterom.ikcd.net/upgrade_file/HC6361-0.775.784s_130802-131633-96d56f0c" target="_blank" rel="external">http://updaterom.ikcd.net/upgrade_file/HC6361-0.775.784s_130802-131633-96d56f0c</a><br>    dd if=rom.bin of=uboot.bin bs=1k count=128<br>    cat uboot.bin bin/ar71xx/openwrt-ar71xx-generic-tw150v1-squashfs-sysupgrade.bin &gt;recovery.bin<br>如果运行第一条命令时，上面的链接404，暂时的解决方法是跳过wget，手动下载官方的一个<a href="http://bbs.hiwifi.com/thread-7710-1-1.html" target="_blank" rel="external">recovery.bin</a>,也可以解压<em>File1</em>： HiWiFi_OpenWrt.zip得到，重命名为rom.bin然后执行下面的命令提取uboot.bin。</p>
+<p>###刷机</p>
+<ol>
+<li>解压<em>File1</em>： HiWiFi_OpenWrt.zip后的文件夹里有tftpd程序(.exe)，将上一步生成的recovery.bin文件放入tftpd程序所在目录，替换掉原来的recovery.bin<ol>
+<li>用网线将极路由 LAN 口与电脑网口相连</li>
+<li>将电脑网络接口 IP 设置为 192.168.1.88/255.255.255.0，如果不行的话就设置成192.168.199.88/255.255.255.0，具体我忘了。</li>
+<li>电脑上运行tftp程序，断开极路由电源，用尖锐物按住极路由 RESET 不放，再接上极路由电源</li>
+<li>等待电脑上 tftpd 出现传输 recovery.bin 进度条完成后，松开 RESET</li>
+<li>极路由面板灯进入跑马灯状态，跑完后，系统自动重启，刷机完成</li>
+<li>如果刷机失败的话，用我压缩包里的小极修砖工具进行修复，具体方法看<a href="http://bbs.hiwifi.com/thread-7492-1-1.html" target="_blank" rel="external">这里</a>。</li>
+</ol>
+</li>
+</ol>
+<p>##OpenWRT配置<br>这部分内容来自<a href="https://gist.github.com/ninehills/2627163" target="_blank" rel="external">ninehills</a></p>
+<p>###初始配置<br><a href="http://wiki.openwrt.org/zh-cn/doc/howto/firstlogin" target="_blank" rel="external">第一次登陆</a>OpenWRT路由器需要用telnet登陆你的路由，Windows下可能需要<a href="https://www.google.com.hk/search?q=windows+telnet&amp;oq=windows+telnet&amp;aqs=chrome..69i57j69i65l3j69i60j69i61.3599j0j7&amp;bmbp=1&amp;sourceid=chrome&amp;espvd=215&amp;es_sm=93&amp;ie=UTF-8" target="_blank" rel="external">安装</a>一下telnet，可以在cmd下试一下<br>然后将路由器的Lan口和你电脑相连，电脑上设置为DHCP模式（如果不行的话，就按刚才刷机中的第3步配置）。然后 </p>
+<pre><code>telent 192.168.199.1  //此处极路由应是192.168.199.1，其他大部分路由应是192.168.1.1
+</code></pre><p>成功后出现OpenWrt的欢迎界面类似这样：</p>
+<figure class="highlight gherkin"><table><tr><td class="code"><pre><div class="line">BusyBox v1.17.3 (2011-02-22 23:42:42 CET) built-in shell (ash)</div><div class="line">Enter 'help' for a list of built-in commands.</div><div class="line">  _______                     ________        __</div><div class="line"> |<span class="string">       </span>|<span class="string">.-----.-----.-----.</span>|<span class="string">  </span>|<span class="string">  </span>|<span class="string">  </span>|<span class="string">.----.</span>|<span class="string">  </span>|_</div><div class="line"> |<span class="string">   -   </span>||<span class="string">  _  </span>|<span class="string">  -__</span>|<span class="string">     </span>||<span class="string">  </span>|<span class="string">  </span>|<span class="string">  </span>||<span class="string">   _</span>||<span class="string">   _</span>|</div><div class="line"> |<span class="string">_______</span>||<span class="string">   __</span>|<span class="string">_____</span>|<span class="string">__</span>|<span class="string">__</span>||<span class="string">________</span>||<span class="string">__</span>|<span class="string">  </span>|<span class="string">____</span>|</div><div class="line">          |<span class="string">__</span>|<span class="string"> W I R E L E S S   F R E E D O M</span></div><div class="line"> ATTITUDE ADJUSTMENT (bleeding edge, r26290) ----------</div><div class="line">  * 1/4 oz Vodka      Pour all ingredents into mixing</div><div class="line">  * 1/4 oz Gin        tin with ice, strain into glass.</div><div class="line">  * 1/4 oz Amaretto</div><div class="line">  * 1/4 oz Triple sec</div><div class="line">  * 1/4 oz Peach schnapps</div><div class="line">  * 1/4 oz Sour mix</div><div class="line">  * 1 splash Cranberry juice</div><div class="line"> -----------------------------------------------------</div><div class="line">root@openwrt:~$</div></pre></td></tr></table></figure>
+<p>然后更改root密码：</p>
+<figure class="highlight less"><table><tr><td class="code"><pre><div class="line">root<span class="variable">@openwrt:</span>~$ passwd root</div><div class="line">Changing password for root</div><div class="line">New <span class="attribute">password</span>:</div><div class="line">Retype <span class="attribute">password</span>:</div><div class="line">Password for root changed by root</div><div class="line">root<span class="variable">@openwrt</span>:~$</div></pre></td></tr></table></figure>
+<p>更改root密码后dropbear(SSH 服务)就运行了，输入<code>exit</code>退出telent，然后</p>
+<pre><code>ssh root@192.168.199.1
+</code></pre><p>以后就可以通过ssh管理OpenWrt.</p>
+<p>###网络配置<br>LuCI是OpenWrt的web管理界面（Web UI），如果你编译固件时没有将LuCI配置进去的话，你就需要先在命令行下完成一定的网络配置，你当然也可以一直用命令行，而不安装LuCI<br>首先备份相关配置，防止出错：</p>
+<pre><code>cp /etc/config ~/ -r
+</code></pre><p>然后用vi修改相关配置。 首先修改<code>/etc/config/wireless</code>文件，注释掉</p>
+<pre><code># option disabled 1
+</code></pre><p>配置文件中，在一行语句的前面加<code>#</code>来注释这行语句，使该语句作用失效<br>然后修改<code>/etc/config/network</code>文件，首先修改<em>lan</em>接口配置，注释掉此行：</p>
+<pre><code># option ifname &apos;eth0&apos;
+</code></pre><p>然后增加<em>wan</em>接口，如果你上级网络是DHCP的，则文件的末尾添加：<br><figure class="highlight vbnet"><table><tr><td class="code"><pre><div class="line">config <span class="keyword">interface</span> <span class="comment">'wan'</span></div><div class="line">    <span class="keyword">option</span> ifname <span class="comment">'eth0'</span></div><div class="line">    <span class="keyword">option</span> proto <span class="comment">'dhcp'</span></div></pre></td></tr></table></figure></p>
+<p>如果你上级网络是静态IP，则在文件的末尾添加类似如下的语句：<br><figure class="highlight vbnet"><table><tr><td class="code"><pre><div class="line">config <span class="keyword">interface</span> <span class="comment">'wan'</span></div><div class="line">    <span class="keyword">option</span> ifname <span class="comment">'eth0'</span></div><div class="line">    <span class="keyword">option</span> proto <span class="comment">'static'</span></div><div class="line">    <span class="keyword">option</span> ipaddr <span class="comment">'10.22.33.124'</span></div><div class="line">    <span class="keyword">option</span> netmask <span class="comment">'255.255.255.0'</span></div><div class="line">    <span class="keyword">option</span> gateway <span class="comment">'10.22.33.1'</span></div><div class="line">    <span class="keyword">option</span> dns <span class="comment">'202.113.16.10'</span></div></pre></td></tr></table></figure></p>
+<p>然后将路由器的Lan/Wan口接到上级网络中，重启路由器。这时便可以通过电脑寻找SSID为 <em>OpenWrt</em>的无线网络，加入后便可以通过：</p>
+<pre><code>ssh root@192.168.199.1
+</code></pre><p>来连接路由器。此时路由也工作在路由模式下，可以正常上网了。<br>无线网络的加密需要修改<code>/etc/config/wireless</code>文件，配置wpa加密需要修改<code>config wifi-iface</code>段</p>
+<pre><code>option ssid OpenWrt
+option encryption psk2
+option key        &apos;secret passphrase&apos;
+</code></pre><p>###安装软件<br>OpenWrt上安装软件需要用opkg包管理系统，主要命令：<br><figure class="highlight dsconfig"><table><tr><td class="code"><pre><div class="line"><span class="comment"># 查看帮助</span></div><div class="line"><span class="string">opkg </span><span class="string">help</span></div><div class="line"><span class="comment"># 更新数据库，必做</span></div><div class="line"><span class="string">opkg </span><span class="string">update</span></div><div class="line"><span class="comment"># 列出已安装的包</span></div><div class="line"><span class="string">opkg </span><span class="built_in">list-installed</span></div><div class="line"><span class="comment"># 安装LuCI</span></div><div class="line"><span class="string">opkg </span><span class="string">install </span><span class="string">luci</span></div><div class="line"><span class="comment"># 更多 参见 http://wiki.openwrt.org/doc/howto/luci.essentials</span></div></pre></td></tr></table></figure></p>
+<p>如果你也用的是巢鹏编译好的固件的话，你可能也会在<code>opkg update</code>时，出现<code>HTTP</code>错误，这是更新源链接无效的问题，可以修改<code>/etc/opkg.conf</code>这个文件，把下面这行：</p>
+<pre><code>src/gz attitude_adjustment http://xxxx.whatever.xxx/yyy/zzz dest root / dest ram /tmp lists_dir ext /var/opkg-lists option overlay_root /overlay
+</code></pre><p>中的这个链接改成<code>http://downloads.openwrt.org/attitude_adjustment/12.09/ar71xx/generic/packages/</code>，其他部分不用变动</p>
+<p>##安装goagent<br>这部分前提是你已经会使用goagent了<br>这部分内容参考<a href="http://www.openwrt.org.cn/bbs/forum.php?mod=viewthread&amp;tid=14500" target="_blank" rel="external">这里</a>，感谢网友mw4530r</p>
+<p>###安装python等<br>安装python的时间可能稍长<br><figure class="highlight vim"><table><tr><td class="code"><pre><div class="line">opkg <span class="keyword">update</span></div><div class="line"># 安装 <span class="keyword">python</span></div><div class="line">opkg install <span class="keyword">python</span></div><div class="line"># 安装 pyopenssl <span class="keyword">python</span>-openssl libopenssl libevent2</div><div class="line">opkg install pyopenssl <span class="keyword">python</span>-openssl libopenssl libevent2</div></pre></td></tr></table></figure></p>
+<p>###把goagent传至路由器<br>下载GoAgent, 解压文件到电脑上<br>修改GoAgent的local文件夹里的proxy.ini文件</p>
+<p>将GoAgent 监听 ip改成0.0.0.0<br><figure class="highlight ini"><table><tr><td class="code"><pre><div class="line"><span class="section">[listen]</span></div><div class="line"><span class="attr">ip</span>=<span class="number">0.0</span>.<span class="number">0.0</span></div><div class="line"><span class="attr">port</span>=<span class="number">8087</span></div></pre></td></tr></table></figure></p>
+<p>将appid改成我之前已经在Google App Engine 部署好的appid, 多个appid用“|”分隔<br><figure class="highlight ini"><table><tr><td class="code"><pre><div class="line"><span class="section">[gae]</span></div><div class="line"><span class="attr">appid</span> = idone|idtwo|idthree</div></pre></td></tr></table></figure></p>
+<p>另外，将PAC设定 <code>enable = 0</code><br><figure class="highlight ini"><table><tr><td class="code"><pre><div class="line"><span class="section">[pac]</span></div><div class="line"><span class="attr">enable</span> = <span class="number">0</span></div></pre></td></tr></table></figure></p>
+<p>修改GoAgent的local文件夹里的proxy.pac文件，把里面的127.0.0.1:8087全部替换成路由器的内网IP，如 192.168.199.1:8087<br>创建目录/app/goagent/local/certs</p>
+<pre><code>mkdir -p /app/goagent/local/certs
+</code></pre><p>把GoAgent的local文件夹里的 certs目录, proxy.py, 及被更改过的 proxy.ini 复制到路由器/app/goagent/local目录下，将被更改过的 proxy.pac 复制到路由器/www目录下<br><figure class="highlight elixir"><table><tr><td class="code"><pre><div class="line">scp goagent_dir/local/certs/* root<span class="variable">@192</span>.<span class="number">168.199</span>.<span class="number">1</span><span class="symbol">:/app/goagent/local/certs</span></div><div class="line">scp goagent_dir/local/proxy.py root<span class="variable">@192</span>.<span class="number">168.199</span>.<span class="number">1</span><span class="symbol">:/app/goagent/local</span></div><div class="line">scp goagent_dir/local/proxy.pac root<span class="variable">@192</span>.<span class="number">168.199</span>.<span class="number">1</span><span class="symbol">:/www</span></div></pre></td></tr></table></figure></p>
+<p>###安装gevent<br>gevent可以让goagent稳定运行，gevent可以自己编译，或者直接使用现成的<code>gevent_1.0rc2-1_ar71xx.ipk</code>,<code>python-greenlet_0.4.0-1_ar71xx.ipk</code>，注意只有<em>ar71xx平台</em>可以使用，bcm等其他平台还是要自己编译。同过跟上面类似的scp命令，上传至路由器，比如上传到<code>/tmp</code>目下，进行安装：<br><figure class="highlight lsl"><table><tr><td class="code"><pre><div class="line">opkg install /tmp/python-greenlet_0<span class="number">.4</span><span class="number">.0</span><span class="number">-1</span>_ar71xx.ipk</div><div class="line">opkg install /tmp/gevent_1<span class="number">.0</span>rc2<span class="number">-1</span>_ar71xx.ipk</div></pre></td></tr></table></figure></p>
+<p>###运行goagent</p>
+<pre><code>python /app/goagent/local/proxy.py
+</code></pre><p>这时在连了该路由器的电脑上使用如下代理，就可以至少访问<a href="http://www.nytimes.com/" target="_blank" rel="external">Newyork Times</a>这类非<code>https</code>链接的网站了，访问<code>https</code>网站，你还需要导入GoAgent证书<br><figure class="highlight groovy"><table><tr><td class="code"><pre><div class="line">HTTP <span class="string">proxy:</span> <span class="string">http:</span><span class="comment">//192.168.199.1</span></div><div class="line"><span class="string">Port:</span> <span class="number">8087</span></div></pre></td></tr></table></figure></p>
+<p>###GoAgent证书导入<br>注: 我目前使用的是GoAgent 3.1.0，在导入了证书以后，用iOS 上的Safari访问Twitter还是不行，访问Facebook和Youtube却没问题，我也看到很多和我一样的情况，后期应该会有修复吧</p>
+<p>Windows和Linux应该分别用管理员和root权限在本地运行一下GoAgent就可以到导入GoAgent证书了，不行的话，这样操作：<br>Windows下Chrome中</p>
+<blockquote>
+<p>设置-&gt;显示高级设置-&gt;HTTPS/SSL-&gt;管理证书-&gt;受信任的根证书颁发机构-&gt;导入-&gt;下一步,浏览-&gt;local\CA.crt-&gt;下一步-&gt;将所有的证书都放入下列存储-&gt;受信任的根证书颁发机构-&gt;下一步,完成</p>
+</blockquote>
+<p>Linux下Chrome中</p>
+<blockquote>
+<p>设置-&gt;显示高级设置-&gt;HTTPS/SSL-&gt;管理证书-&gt;授权中心-&gt;导入-&gt;下一步,浏览-&gt;local\CA.crt-&gt;把复选框都选中-&gt;确定</p>
+</blockquote>
+<p>Firefox中，<em>我不知道，你可以Google的嘛</em><br>iOS平台，通过sarari访问 <a href="https://goagent.googlecode.com/files/CA.crt" target="_blank" rel="external">https://goagent.googlecode.com/files/CA.crt</a>这里，然后安装，你也可以吧<code>CA.crt</code>通过邮件的方式发给自己，但你需要用iOS自带的邮件应用打开附件。</p>
+<p>###使用PAC文件作为自动代理设置<br>如下：</p>
+<pre><code>http://192.168.199.1/proxy.pac
+</code></pre><p>注意：<code>http://192.168.199.1</code>后面不需要接端口。除非你的<code>proxy.ini</code>中的pac是enable的<br>iOS平台下：</p>
+<blockquote>
+<p>Settings -&gt; Wi-Fi -&gt; CurrentWiFi -&gt; HTTP Proxy -&gt; Auto -&gt; <a href="http://192.168.199.1/proxy.pac" target="_blank" rel="external">http://192.168.199.1/proxy.pac</a></p>
+</blockquote>
+<p>###开机启动GoAgent<br>修改<code>/etc/rc.local</code>，在<code>exit 0</code>之前增加以下命令</p>
+<pre><code>python /app/goagent/local/proxy.py &gt;/dev/null 2&gt;&amp;1 &amp;
+</code></pre><p>-EOF-</p>
+</div><div class="post-footer">Updated on 16/07/10</div></div><div class="post-nav"><div style="height: 0; width: 0; position: absolute; visibility: hidden">
+  <!-- inject:svg --><svg xmlns="http://www.w3.org/2000/svg"><symbol id="ic_chevron_left_white_24px" viewBox="0 0 24 24">
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</symbol><symbol id="ic_chevron_right_white_24px" viewBox="0 0 24 24">
+    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</symbol></svg><!-- endinjected -->
+</div><a href="/2013/Love_Actually_Is_A_Good_Movie/" class="nav prev"><svg class="icon left"><use xlink:href="#ic_chevron_left_white_24px"></use></svg>PREVIOUS</a><a href="/2013/learn_htmlcss_beginner/" class="nav next">NEXT<svg class="icon right"><use xlink:href="#ic_chevron_right_white_24px"></use></svg></a></div></section><footer><h3>Carlog</h3><div class="additional"><span>&copy;</span> 2016 <a href="http://hanhaishan.com">Haishan</a><br> Powered by <a href="https://hexo.io">Hexo</a>, theme using <a href="https://github.com/haishanh/hexo-theme-zxcvb">zxcvb</a>, hosted by <a href="https://github.com/haishanh/blog/tree/gh-pages">Github Pages</a></div></footer><script src="/js/script.js"></script></body></html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html><html><head><title>怎样在Ubuntu(Unity)上安装Sublime Text 2 | Carlog</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><link rel="alternate" href="atom.xml" type="application/atom+xml"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/main.css" type="text/css"></head><body><header><div class="wrapper"><a href="/" class="site-title"><code>Carlog</code></a><div class="menu"><span class="hamburger"><span></span></span></div><nav role="navigation" class="nav"><a href="/">Home</a><a href="/archives">Archives</a><a href="/atom.xml">RSS</a></nav></div></header><section class="main post"><div class="wrapper clearfix"><div class="post-header"><h2 class="post-title"><a href="/2013/how_to_install_sublime_text_in_ubuntu/">怎样在Ubuntu(Unity)上安装Sublime Text 2</a></h2><time datetime="2013-03-18T02:34:17.000Z">March 18, 2013</time></div><div class="post-content"><p>本文是对Technoreply上Jevin写的<a href="http://www.technoreply.com/how-to-install-sublime-text-2-on-ubuntu-12-04-unity/" target="_blank" rel="external">这篇文章</a>的翻译和整理。      </p>
+<p>Sublime Text是个碉堡了的文本编辑器。如果你还没有听过这个神器，快来<a href="http://www.sublimetext.com/" target="_blank" rel="external">这里</a>看看。<br>我制作本指南是Linux版本的Sublime Text没有直接安装文件。这并不是什么大问题，但要是有个指南什么的当然更好。这篇文章正是教你如何在Unity中安装Sublime Text。</p>
+<h3 id="第一步"><a href="#第一步" class="headerlink" title="第一步"></a>第一步</h3><p>去Sublime Text官方网站下载对应Linux的tarfile文件。下面是解压缩<code>.tar.bz2</code>文件的命令：</p>
+<pre><code>tar xf Sublime\ Text\ 2.0.1.tar.bz2    
+</code></pre><p>如果你用的是64位系统，建议你下载针对64位的tarfile。</p>
+<a id="more"></a> 
+<h3 id="第二步"><a href="#第二步" class="headerlink" title="第二步"></a>第二步</h3><p>解压后你将得到一个名为<code>Sublime Text 2</code>的文件夹。该文件夹包含了所有Sublime Text需要的东西。其实此时在x界面直接进入这个文件夹双击<code>sublime_text</code>这个文件就可以运行Sublime Text了。但为了更优雅一点，请继续下面的步骤。<br>将这个文件夹一刀一个更适合的位置，比如<code>/opt/</code>这个目录：</p>
+<pre><code>sudo mv Sublime\ Text\ 2 /opt/
+</code></pre><h3 id="第三步"><a href="#第三步" class="headerlink" title="第三步"></a>第三步</h3><p>有时，你会想在终端中通过输入<code>sublime</code>来调用Sublime Text。我们可以通过在<code>/usr/bin</code>目录下建立一个软链接来实现：</p>
+<pre><code>sudo ln -s /opt/Sublime\ Text\ 2/sublime_text /usr/bin/sublime
+</code></pre><h3 id="第四步"><a href="#第四步" class="headerlink" title="第四步"></a>第四步</h3><p>这时，我们需要在Unity里建立一个启动器。可以通过在<code>/usr/share/applications</code>目录下创建一个<code>.desktop</code>文件来实现：</p>
+<pre><code>sudo sublime /usr/share/applications/sublime.desktop
+</code></pre><p>这时Sublime Text就会启动，把一下内容复制进去，然后保存。</p>
+<pre><code>[Desktop Entry]
+Version=1.0
+Name=Sublime Text 2
+# Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
+# From Ubuntu&apos;s language-pack-kde-XX-base packages, version 9.04-20090413.
+GenericName=Text Editor
+
+Exec=sublime
+Terminal=false
+Icon=/opt/Sublime Text 2/Icon/128x128/sublime_text.png
+Type=Application
+Categories=TextEditor;IDE;Development
+X-Ayatana-Desktop-Shortcuts=NewWindow
+
+[NewWindow Shortcut Group]
+Name=New Window
+Exec=sublime -n
+TargetEnvironment=Unity
+</code></pre><p>正如你看到的，这些参数都很直白明了，你可以自己试着改动里面的参数玩玩。</p>
+<h3 id="第五步"><a href="#第五步" class="headerlink" title="第五步"></a>第五步</h3><p>如果你想用Sublime Text打开全部的文本文件，最简单的方法就是更改原本的默认打开程序列表：</p>
+<pre><code>sudo sublime /usr/share/applications/defaults.list
+</code></pre><p>用sublime.desktop取代所有gedit.desktop出现的地方。<br>搞定！你现在就像职业程序员一样在Ubuntu上拥有了神器Sublime Text 2</p>
+</div><div class="post-footer">Updated on 16/07/10</div></div><div class="post-nav"><div style="height: 0; width: 0; position: absolute; visibility: hidden">
+  <!-- inject:svg --><svg xmlns="http://www.w3.org/2000/svg"><symbol id="ic_chevron_left_white_24px" viewBox="0 0 24 24">
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</symbol><symbol id="ic_chevron_right_white_24px" viewBox="0 0 24 24">
+    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</symbol></svg><!-- endinjected -->
+</div><a href="/2013/Goodbye_Google_Reader/" class="nav prev"><svg class="icon left"><use xlink:href="#ic_chevron_left_white_24px"></use></svg>PREVIOUS</a><a href="/2013/instagram_celebrity/" class="nav next">NEXT<svg class="icon right"><use xlink:href="#ic_chevron_right_white_24px"></use></svg></a></div></section><footer><h3>Carlog</h3><div class="additional"><span>&copy;</span> 2016 <a href="http://hanhaishan.com">Haishan</a><br> Powered by <a href="https://hexo.io">Hexo</a>, theme using <a href="https://github.com/haishanh/hexo-theme-zxcvb">zxcvb</a>, hosted by <a href="https://github.com/haishanh/blog/tree/gh-pages">Github Pages</a></div></footer><script src="/js/script.js"></script></body></html>
