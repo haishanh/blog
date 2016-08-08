@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.hanhaishan.com/"/>
-  <updated>2016-08-08T16:30:30.000Z</updated>
+  <updated>2016-08-08T16:39:42.000Z</updated>
   <id>http://blog.hanhaishan.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://blog.hanhaishan.com/2016/pug/"/>
     <id>http://blog.hanhaishan.com/2016/pug/</id>
     <published>2016-07-27T16:00:00.000Z</published>
-    <updated>2016-08-08T16:30:30.000Z</updated>
+    <updated>2016-08-08T16:39:42.000Z</updated>
     
     <content type="html">&lt;p&gt;因为之前用 Python, 其最有名的 template 就是 &lt;a href=&quot;http://jinja.pocoo.org/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Jinja2&lt;/a&gt;，所以在开始使用 JavaScript 的 html template 的时候，我就尝试和 Jinja2 非常相似的 &lt;a href=&quot;http://paularmstrong.github.io/swig/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Swig&lt;/a&gt;。后来觉得 Swig 写起来不够自由，所以后面又使用 &lt;a href=&quot;https://github.com/mde/ejs&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ejs&lt;/a&gt;，ejs 写起来是很自由，但写完之后，读起来很难受，改起来也很难受。&lt;/p&gt;
 &lt;p&gt;而目前我最喜欢的 template engine 是 Pug（之前叫Jade）.&lt;/p&gt;
